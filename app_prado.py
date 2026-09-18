@@ -17,7 +17,7 @@ st.markdown("""
 
 # --- FUNCIÓN PARA DIBUJAR LA VENTANA ESTILO EXCEL (A PRUEBA DE FALLOS) ---
 def generar_dibujo_ventana(num, largo, ancho, cerco, chambrana_lat, zoclo):
-    # Todo el código en un solo bloque contínuo para evitar que Streamlit lo lea como texto
+    # Todo el código en un solo bloque contínuo
     svg = (
         f'<div style="display: flex; justify-content: center; margin-bottom: 10px;">'
         f'<svg viewBox="0 0 350 180" width="100%" max-width="350px" xmlns="http://www.w3.org/2000/svg">'
@@ -32,10 +32,10 @@ def generar_dibujo_ventana(num, largo, ancho, cerco, chambrana_lat, zoclo):
         # Medida en ROJO Abajo (Largo total)
         f'<text x="150" y="160" fill="red" font-family="Arial" font-size="14" text-anchor="middle">{largo:.2f}</text>'
         
-        # Medida en AZUL Izquierda (Cerco) - Centrado verticalmente
+        # Medida en AZUL Izquierda (Cerco)
         f'<text x="45" y="90" fill="#2073ac" font-family="Arial" font-size="14" text-anchor="end">{cerco:.2f}</text>'
         
-        # Medidas Derecha (Ancho total y Chambrana) - Emparejados uno arriba del otro
+        # Medidas Derecha (Ancho total y Chambrana)
         f'<text x="260" y="75" fill="red" font-family="Arial" font-size="14">{ancho:.2f}</text>'
         f'<text x="260" y="95" fill="#2073ac" font-family="Arial" font-size="14">{chambrana_lat:.2f}</text>'
         
@@ -149,7 +149,8 @@ for i in range(1, num_ventanas + 1):
 
         with col_dibujo:
             dibujo = generar_dibujo_ventana(i, largo, ancho, ancho_cerco, ancho_lados, medida_zc)
-            st.html(dibujo)
+            # AQUÍ ESTÁ EL CAMBIO CLAVE: Regresamos al método markdown confiable
+            st.markdown(dibujo, unsafe_allow_html=True)
             
     st.write("---")
 
