@@ -15,39 +15,26 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- FUNCIÓN PARA DIBUJAR LA VENTANA ESTILO EXCEL ---
+# --- FUNCIÓN PARA DIBUJAR LA VENTANA ESTILO EXCEL (A PRUEBA DE FALLOS) ---
 def generar_dibujo_ventana(num, largo, ancho, cerco, chambrana_lat, zoclo):
-    # Sin sangría (espacios) a la izquierda para evitar que se vuelva un bloque de código
-    svg = f"""<div style="display: flex; justify-content: center; margin-bottom: 10px;">
-<svg viewBox="0 0 350 180" width="100%" max-width="350px" xmlns="http://www.w3.org/2000/svg">
-    <!-- Etiqueta V-1 -->
-    <text x="10" y="20" font-family="Arial" font-size="14" fill="black">V-{num}</text>
-
-    <!-- Marco exterior azul oscuro -->
-    <rect x="50" y="30" width="200" height="110" fill="none" stroke="#1b6088" stroke-width="3"/>
-    <!-- División central -->
-    <line x1="150" y1="30" x2="150" y2="140" stroke="#1b6088" stroke-width="2"/>
-    
-    <!-- Flechas de corrediza -->
-    <line x1="80" y1="85" x2="120" y2="85" stroke="#1b6088" stroke-width="2"/>
-    <polyline points="110,75 120,85 110,95" fill="none" stroke="#1b6088" stroke-width="2"/>
-    
-    <line x1="180" y1="85" x2="220" y2="85" stroke="#1b6088" stroke-width="2"/>
-    <polyline points="190,75 180,85 190,95" fill="none" stroke="#1b6088" stroke-width="2"/>
-
-    <!-- Medidas en ROJO (Totales) -->
-    <text x="150" y="160" fill="red" font-family="Arial" font-size="14" text-anchor="middle">{largo:.2f}</text>
-    <text x="260" y="45" fill="red" font-family="Arial" font-size="14">{ancho:.2f}</text>
-
-    <!-- Medidas en AZUL (Cortes) -->
-    <!-- Izquierda (Cerco) -->
-    <text x="45" y="130" fill="#2073ac" font-family="Arial" font-size="14" text-anchor="end">{cerco:.2f}</text>
-    <!-- Derecha exterior (Chambrana Lados) -->
-    <text x="255" y="130" fill="#2073ac" font-family="Arial" font-size="14">{chambrana_lat:.2f}</text>
-    <!-- Derecha interior abajo (Zoclo/Cabezal) -->
-    <text x="245" y="135" fill="#2073ac" font-family="Arial" font-size="14" text-anchor="end">{zoclo:.2f}</text>
-</svg>
-</div>"""
+    # Todo el código en un solo bloque contínuo para evitar que Streamlit lo lea como texto
+    svg = (
+        f'<div style="display: flex; justify-content: center; margin-bottom: 10px;">'
+        f'<svg viewBox="0 0 350 180" width="100%" max-width="350px" xmlns="http://www.w3.org/2000/svg">'
+        f'<text x="10" y="20" font-family="Arial" font-size="14" fill="black">V-{num}</text>'
+        f'<rect x="50" y="30" width="200" height="110" fill="none" stroke="#1b6088" stroke-width="3"/>'
+        f'<line x1="150" y1="30" x2="150" y2="140" stroke="#1b6088" stroke-width="2"/>'
+        f'<line x1="80" y1="85" x2="120" y2="85" stroke="#1b6088" stroke-width="2"/>'
+        f'<polyline points="110,75 120,85 110,95" fill="none" stroke="#1b6088" stroke-width="2"/>'
+        f'<line x1="180" y1="85" x2="220" y2="85" stroke="#1b6088" stroke-width="2"/>'
+        f'<polyline points="190,75 180,85 190,95" fill="none" stroke="#1b6088" stroke-width="2"/>'
+        f'<text x="150" y="160" fill="red" font-family="Arial" font-size="14" text-anchor="middle">{largo:.2f}</text>'
+        f'<text x="260" y="45" fill="red" font-family="Arial" font-size="14">{ancho:.2f}</text>'
+        f'<text x="45" y="130" fill="#2073ac" font-family="Arial" font-size="14" text-anchor="end">{cerco:.2f}</text>'
+        f'<text x="255" y="130" fill="#2073ac" font-family="Arial" font-size="14">{chambrana_lat:.2f}</text>'
+        f'<text x="245" y="135" fill="#2073ac" font-family="Arial" font-size="14" text-anchor="end">{zoclo:.2f}</text>'
+        f'</svg></div>'
+    )
     return svg
 # ---------------------------------------------------------
 
@@ -152,10 +139,9 @@ for i in range(1, num_ventanas + 1):
         cortes_cabezales.extend([{'medida': medida_zc, 'descripcion': f"V{i} (Cabezal 1)"}, {'medida': medida_zc, 'descripcion': f"V{i} (Cabezal 2)"}])
         cristales_necesarios.append({'largo': largo_cristal, 'ancho': ancho_cristal, 'descripcion': f"Ventana {i}"})
 
-        # --- AQUÍ INYECTAMOS EL DIBUJO ---
         with col_dibujo:
             dibujo = generar_dibujo_ventana(i, largo, ancho, ancho_cerco, ancho_lados, medida_zc)
-            st.html(dibujo)
+            st.markdown(dibujo, unsafe_allow_html=True)
             
     st.write("---")
 
