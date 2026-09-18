@@ -46,8 +46,9 @@ def crear_pdf_prado(ventanas_datos, totales_aluminio, cristales_necesarios):
     pdf.line(140, pdf.get_y()+6, 195, pdf.get_y()+6)
     pdf.ln(15)
 
-    x_start_1 = 20
-    x_start_2 = 115
+    # Damos un poquito más de margen para que el número izquierdo no se salga de la hoja
+    x_start_1 = 25
+    x_start_2 = 125
     y_current = pdf.get_y()
 
     for i, v in enumerate(ventanas_datos):
@@ -62,7 +63,7 @@ def crear_pdf_prado(ventanas_datos, totales_aluminio, cristales_necesarios):
             y_current = 20
 
         pdf.set_text_color(0, 0, 0)
-        pdf.text(x, y_current, f"V-{v['num']}")
+        pdf.text(x - 5, y_current, f"V-{v['num']}")
 
         pdf.set_draw_color(27, 96, 136)
         pdf.set_line_width(0.8)
@@ -79,22 +80,31 @@ def crear_pdf_prado(ventanas_datos, totales_aluminio, cristales_necesarios):
         pdf.line(bx + bw/2 + 5, by + bh/2, bx + bw/2 + 10, by + bh/2 - 3)
         pdf.line(bx + bw/2 + 5, by + bh/2, bx + bw/2 + 10, by + bh/2 + 3)
 
-        # --- CORRECCIÓN DE COORDENADAS PARA EL PDF ---
+        # --- CORRECCIÓN MATEMÁTICA DE COORDENADAS PARA EL PDF ---
         # Medidas Rojas
         pdf.set_text_color(255, 0, 0)
-        # Largo (Abajo centrado)
-        pdf.text(bx + bw/2 - 6, by + bh + 4.5, f"{v['largo']:.2f}")
-        # Ancho (Derecha, arriba del centro)
+        # Largo (Centrado perfecto abajo del cuadro)
+        str_largo = f"{v['largo']:.2f}"
+        w_largo = pdf.get_string_width(str_largo)
+        pdf.text(bx + (bw - w_largo)/2, by + bh + 4.5, str_largo)
+        
+        # Ancho (Derecha)
         pdf.text(bx + bw + 2, by + bh/2 - 1, f"{v['ancho']:.2f}")
 
         # Medidas Azules
         pdf.set_text_color(32, 115, 172)
-        # Cerco (Izquierda, centrado verticalmente)
-        pdf.text(x, by + bh/2 + 2, f"{v['cerco']:.2f}")
-        # Chambrana Lados (Derecha, abajo del centro haciendo pareja con el ancho)
+        # Cerco (Izquierda, se empuja a la izquierda según lo ancho del texto)
+        str_cerco = f"{v['cerco']:.2f}"
+        w_cerco = pdf.get_string_width(str_cerco)
+        pdf.text(bx - w_cerco - 1.5, by + bh/2 + 2, str_cerco)
+        
+        # Chambrana Lados (Derecha)
         pdf.text(bx + bw + 2, by + bh/2 + 3.5, f"{v['chambrana_lat']:.2f}")
-        # Zoclo/Cabezal (Adentro derecha, esquina inferior)
-        pdf.text(bx + bw - 11, by + bh - 2, f"{v['zoclo']:.2f}")
+        
+        # Zoclo/Cabezal (Adentro derecha, alineado siempre a la orilla del centro)
+        str_zoclo = f"{v['zoclo']:.2f}"
+        w_zoclo = pdf.get_string_width(str_zoclo)
+        pdf.text(bx + bw - w_zoclo - 1.5, by + bh - 2, str_zoclo)
 
     pdf.set_y(y_current + 45)
 
