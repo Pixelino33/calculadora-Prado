@@ -1,5 +1,6 @@
 import streamlit as st
 from fpdf import FPDF
+from datetime import datetime
 
 # --- INYECCIÓN DE CSS PARA LOS BOTONES Y DISEÑO LIMPIO ---
 st.markdown("""
@@ -23,7 +24,6 @@ def obtener_texto_compras(lista):
     for barra in lista:
         t = barra['tamano_comprado']
         conteo[t] = conteo.get(t, 0) + 1
-    # Formato: "2 pz de 610cm + 1 pz de 305cm"
     return " + ".join([f"{c} pz de {t:g}cm" for t, c in sorted(conteo.items(), reverse=True)])
 
 # --- FUNCIÓN PARA EL PDF DESCARGABLE ---
@@ -32,7 +32,6 @@ def crear_pdf_prado(ventanas_datos, totales_aluminio, cristales_necesarios):
     pdf.add_page()
     pdf.set_font("helvetica", size=10)
 
-    # Encabezado para llenar a mano
     pdf.cell(15, 8, "Cliente:")
     pdf.line(30, pdf.get_y()+6, 110, pdf.get_y()+6)
     pdf.set_x(120)
@@ -47,7 +46,6 @@ def crear_pdf_prado(ventanas_datos, totales_aluminio, cristales_necesarios):
     pdf.line(140, pdf.get_y()+6, 195, pdf.get_y()+6)
     pdf.ln(15)
 
-    # Dibujos de ventanas estilo Excel
     x_start_1 = 20
     x_start_2 = 115
     y_current = pdf.get_y()
@@ -63,18 +61,15 @@ def crear_pdf_prado(ventanas_datos, totales_aluminio, cristales_necesarios):
             pdf.add_page()
             y_current = 20
 
-        # Texto V-1, V-2, etc.
         pdf.set_text_color(0, 0, 0)
         pdf.text(x, y_current, f"V-{v['num']}")
 
-        # Marco de la ventana
         pdf.set_draw_color(27, 96, 136)
         pdf.set_line_width(0.8)
         bx, by, bw, bh = x + 10, y_current - 5, 50, 30
         pdf.rect(bx, by, bw, bh)
-        pdf.line(bx + bw/2, by, bx + bw/2, by + bh) # División central
+        pdf.line(bx + bw/2, by, bx + bw/2, by + bh)
 
-        # Flechas de corrediza
         pdf.set_line_width(0.3)
         pdf.line(bx + 5, by + bh/2, bx + bw/2 - 5, by + bh/2)
         pdf.line(bx + bw/2 - 5, by + bh/2, bx + bw/2 - 10, by + bh/2 - 3)
@@ -84,12 +79,10 @@ def crear_pdf_prado(ventanas_datos, totales_aluminio, cristales_necesarios):
         pdf.line(bx + bw/2 + 5, by + bh/2, bx + bw/2 + 10, by + bh/2 - 3)
         pdf.line(bx + bw/2 + 5, by + bh/2, bx + bw/2 + 10, by + bh/2 + 3)
 
-        # Medidas Rojas
         pdf.set_text_color(255, 0, 0)
         pdf.text(bx + bw/2 - 5, by + bh + 5, f"{v['largo']:.2f}")
         pdf.text(bx + bw + 2, by + 10, f"{v['ancho']:.2f}")
 
-        # Medidas Azules
         pdf.set_text_color(32, 115, 172)
         pdf.text(x, by + bh - 2, f"{v['cerco']:.2f}")
         pdf.text(bx + bw + 2, by + bh - 2, f"{v['chambrana_lat']:.2f}")
@@ -97,33 +90,27 @@ def crear_pdf_prado(ventanas_datos, totales_aluminio, cristales_necesarios):
 
     pdf.set_y(y_current + 45)
 
-    # Tabla de totales (Aluminio y Cristal)
     pdf.set_text_color(0, 0, 0)
     pdf.set_font("helvetica", "B", 10)
     pdf.cell(90, 8, "Aluminio:", border=1)
     pdf.cell(90, 8, "Cristal:", border=1)
     pdf.ln()
 
-    # Reducimos un puntito la letra por si son varios tramos de aluminio
     pdf.set_font("helvetica", "", 9)
     aluminio_keys = list(totales_aluminio.keys())
     max_rows = max(len(aluminio_keys), len(cristales_necesarios))
 
     for r in range(max_rows):
-        # Columna Aluminio
         if r < len(aluminio_keys):
             k = aluminio_keys[r]
             val = totales_aluminio[k]
-            # Ajustamos anchos: 25 para el nombre, 65 para las cantidades
             pdf.cell(25, 6, f"{k}:", border=1)
             pdf.cell(65, 6, f"{val}", border=1, align="R")
         else:
             pdf.cell(90, 6, "", border=1)
 
-        # Columna Cristal
         if r < len(cristales_necesarios):
             c = cristales_necesarios[r]
-            # Ajustamos anchos: 20 para la etiqueta, 70 para la medida
             pdf.cell(20, 6, f"{c['descripcion']}", border=1)
             pdf.cell(70, 6, f"{c['largo']:.2f} X {c['ancho']:.2f}", border=1, align="C")
         else:
@@ -208,6 +195,7 @@ st.set_page_config(page_title="Calculadora de Materiales", layout="centered", pa
 st.title("Calculadora de Materiales")
 st.write("**Tipo de Ventana:** Corrediza")
 
+# La cantidad de ventanas se queda en 1 por default para que siempre muestre al menos una caja
 num_ventanas = st.number_input("Cantidad de ventanas a armar:", min_value=1, max_value=50, value=1, step=1)
 
 cortes_chambranas = []
@@ -228,10 +216,12 @@ for i in range(1, num_ventanas + 1):
     col_medidas, col_dibujo = st.columns([1, 1])
     
     with col_medidas:
-        largo = st.number_input(f"Largo total (cm) - V{i}", min_value=0.0, value=100.0, step=0.1, format="%.1f", key=f"largo_{i}")
-        ancho = st.number_input(f"Ancho total (cm) - V{i}", min_value=0.0, value=100.0, step=0.1, format="%.1f", key=f"ancho_{i}")
+        # Aquí está la magia: value=None hace que arranquen totalmente vacías
+        largo = st.number_input(f"Largo total (cm) - V{i}", min_value=0.0, value=None, step=0.1, format="%.1f", key=f"largo_{i}", placeholder="Ej. 120.0")
+        ancho = st.number_input(f"Ancho total (cm) - V{i}", min_value=0.0, value=None, step=0.1, format="%.1f", key=f"ancho_{i}", placeholder="Ej. 100.0")
 
-    if largo > 0 and ancho > 0:
+    # Solo hacemos los cálculos si Prado ya tecleó ambos números
+    if largo is not None and ancho is not None and largo > 0 and ancho > 0:
         ancho_lados = ancho - 2.7
         medida_adaptador = largo - 6.5
         ancho_cerco = ancho - 4.0
@@ -239,7 +229,6 @@ for i in range(1, num_ventanas + 1):
         largo_cristal = medida_zc + 1.5
         ancho_cristal = ancho_cerco - 9.5
 
-        # Acumular Cortes
         cortes_chambranas.append({'medida': largo, 'descripcion': f"V{i} (Arriba)"})
         cortes_chambranas.append({'medida': ancho_lados, 'descripcion': f"V{i} (Lado Izq)"})
         cortes_chambranas.append({'medida': ancho_lados, 'descripcion': f"V{i} (Lado Der)"})
@@ -251,7 +240,6 @@ for i in range(1, num_ventanas + 1):
         cortes_cabezales.extend([{'medida': medida_zc, 'descripcion': f"V{i} (Cabezal 1)"}, {'medida': medida_zc, 'descripcion': f"V{i} (Cabezal 2)"}])
         cristales_necesarios.append({'largo': largo_cristal, 'ancho': ancho_cristal, 'descripcion': f"V-{i}"})
 
-        # Guardar para PDF
         ventanas_pdf.append({'num': i, 'largo': largo, 'ancho': ancho, 'cerco': ancho_cerco, 'chambrana_lat': ancho_lados, 'zoclo': medida_zc})
 
         with col_dibujo:
@@ -272,7 +260,6 @@ if st.button("Calcular Material", type="primary", use_container_width=True):
     zoclos = empacar_piezas(cortes_zoclos, tamanos_basicos)
     cabezales = empacar_piezas(cortes_cabezales, tamanos_basicos)
 
-    # Convertimos los cálculos a textos con cantidad de piezas para el PDF
     totales_aluminio = {
         "Chambrana": obtener_texto_compras(chambranas),
         "Riel": obtener_texto_compras(rieles),
@@ -283,13 +270,16 @@ if st.button("Calcular Material", type="primary", use_container_width=True):
         "Cabezal": obtener_texto_compras(cabezales),
     }
 
-    # Generar el archivo PDF
+    # --- AQUÍ ARMAMOS EL NOMBRE CON LA FECHA DE HOY ---
+    fecha_hoy = datetime.now().strftime("%d-%m-%Y")
+    nombre_archivo_pdf = f"Presupuesto_{fecha_hoy}.pdf"
+
     pdf_bytes = crear_pdf_prado(ventanas_pdf, totales_aluminio, cristales_necesarios)
     
     st.download_button(
         label="📄 Descargar Hoja de Presupuesto (PDF)",
         data=pdf_bytes,
-        file_name="Presupuesto_Prado.pdf",
+        file_name=nombre_archivo_pdf,
         mime="application/pdf"
     )
 
