@@ -119,27 +119,26 @@ for i in range(1, num_ventanas + 1):
     col1, col2 = st.columns(2)
     
     with col1:
-        # El format="%.1f" restringe visualmente a un decimal (ej. 100.0)
         largo = st.number_input(f"Largo (cm) - V{i}", min_value=0.0, value=100.0, step=0.1, format="%.1f", key=f"largo_{i}")
     with col2:
-        alto = st.number_input(f"Alto (cm) - V{i}", min_value=0.0, value=100.0, step=0.1, format="%.1f", key=f"alto_{i}")
+        ancho = st.number_input(f"Ancho (cm) - V{i}", min_value=0.0, value=100.0, step=0.1, format="%.1f", key=f"ancho_{i}")
 
-    if largo > 0 and alto > 0:
+    if largo > 0 and ancho > 0:
         cortes_chambranas.append({'medida': largo, 'descripcion': f"V{i} (Arriba)"})
-        alto_lados = alto - 2.7
-        cortes_chambranas.append({'medida': alto_lados, 'descripcion': f"V{i} (Lado Izq)"})
-        cortes_chambranas.append({'medida': alto_lados, 'descripcion': f"V{i} (Lado Der)"})
+        ancho_lados = ancho - 2.7
+        cortes_chambranas.append({'medida': ancho_lados, 'descripcion': f"V{i} (Lado Izq)"})
+        cortes_chambranas.append({'medida': ancho_lados, 'descripcion': f"V{i} (Lado Der)"})
         
         cortes_rieles.append({'medida': largo, 'descripcion': f"V{i} (Riel Abajo)"})
         
         medida_adaptador = largo - 6.5
         cortes_adaptadores.append({'medida': medida_adaptador, 'descripcion': f"V{i} (Adaptador Abajo)"})
         
-        alto_cerco = alto - 4.0
-        cortes_cercos.extend([{'medida': alto_cerco, 'descripcion': f"V{i} (Cerco 1)"}, 
-                              {'medida': alto_cerco, 'descripcion': f"V{i} (Cerco 2)"}])
-        cortes_traslapes.extend([{'medida': alto_cerco, 'descripcion': f"V{i} (Traslape 1)"}, 
-                                 {'medida': alto_cerco, 'descripcion': f"V{i} (Traslape 2)"}])
+        ancho_cerco = ancho - 4.0
+        cortes_cercos.extend([{'medida': ancho_cerco, 'descripcion': f"V{i} (Cerco 1)"}, 
+                              {'medida': ancho_cerco, 'descripcion': f"V{i} (Cerco 2)"}])
+        cortes_traslapes.extend([{'medida': ancho_cerco, 'descripcion': f"V{i} (Traslape 1)"}, 
+                                 {'medida': ancho_cerco, 'descripcion': f"V{i} (Traslape 2)"}])
         
         medida_zc = (largo - 16.5) / 2.0
         cortes_zoclos.extend([{'medida': medida_zc, 'descripcion': f"V{i} (Zoclo 1)"}, 
