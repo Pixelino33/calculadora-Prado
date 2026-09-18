@@ -111,6 +111,7 @@ cortes_cercos = []
 cortes_traslapes = []
 cortes_zoclos = []
 cortes_cabezales = []
+cristales_necesarios = [] # <--- LISTA NUEVA PARA LOS CRISTALES
 
 st.write("---")
 
@@ -124,6 +125,7 @@ for i in range(1, num_ventanas + 1):
         ancho = st.number_input(f"Ancho (cm) - V{i}", min_value=0.0, value=100.0, step=0.1, format="%.1f", key=f"ancho_{i}")
 
     if largo > 0 and ancho > 0:
+        # Perfiles de aluminio
         cortes_chambranas.append({'medida': largo, 'descripcion': f"V{i} (Arriba)"})
         ancho_lados = ancho - 2.7
         cortes_chambranas.append({'medida': ancho_lados, 'descripcion': f"V{i} (Lado Izq)"})
@@ -145,6 +147,15 @@ for i in range(1, num_ventanas + 1):
                               {'medida': medida_zc, 'descripcion': f"V{i} (Zoclo 2)"}])
         cortes_cabezales.extend([{'medida': medida_zc, 'descripcion': f"V{i} (Cabezal 1)"}, 
                                  {'medida': medida_zc, 'descripcion': f"V{i} (Cabezal 2)"}])
+
+        # --- CÁLCULO DE CRISTALES ---
+        largo_cristal = medida_zc + 1.5
+        ancho_cristal = ancho - 9.5
+        cristales_necesarios.append({
+            'largo': largo_cristal,
+            'ancho': ancho_cristal,
+            'descripcion': f"Ventana {i}"
+        })
 
 st.write("---")
 
@@ -169,3 +180,9 @@ if st.button("Calcular Material", type="primary", use_container_width=True):
     mostrar_resultados_ui(traslapes, "Traslapes")
     mostrar_resultados_ui(zoclos, "Zoclos")
     mostrar_resultados_ui(cabezales, "Cabezales")
+
+    # --- MOSTRAR LOS CRISTALES DIRECTO A COMPRA ---
+    if cristales_necesarios:
+        st.subheader("🛒 CRISTALES")
+        for cristal in cristales_necesarios:
+            st.info(f"**2 piezas** de {cristal['largo']:.1f} cm (Largo) x {cristal['ancho']:.1f} cm (Ancho) ➔ {cristal['descripcion']}")
