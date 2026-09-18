@@ -150,7 +150,7 @@ for i in range(1, num_ventanas + 1):
 
         # --- CÁLCULO DE CRISTALES ---
         largo_cristal = medida_zc + 1.5
-        ancho_cristal = ancho - 9.5
+        ancho_cristal = ancho_cerco - 9.5
         cristales_necesarios.append({
             'largo': largo_cristal,
             'ancho': ancho_cristal,
