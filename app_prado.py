@@ -16,6 +16,16 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# --- FUNCIÓN PARA TRADUCIR CORTES A BARRAS PARA EL PDF ---
+def obtener_texto_compras(lista):
+    if not lista: return "-"
+    conteo = {}
+    for barra in lista:
+        t = barra['tamano_comprado']
+        conteo[t] = conteo.get(t, 0) + 1
+    # Formato: "2 pz de 610cm + 1 pz de 305cm"
+    return " + ".join([f"{c} pz de {t:g}cm" for t, c in sorted(conteo.items(), reverse=True)])
+
 # --- FUNCIÓN PARA EL PDF DESCARGABLE ---
 def crear_pdf_prado(ventanas_datos, totales_aluminio, cristales_necesarios):
     pdf = FPDF()
@@ -66,11 +76,10 @@ def crear_pdf_prado(ventanas_datos, totales_aluminio, cristales_necesarios):
 
         # Flechas de corrediza
         pdf.set_line_width(0.3)
-        # Flecha Izquierda (apuntando a la derecha)
         pdf.line(bx + 5, by + bh/2, bx + bw/2 - 5, by + bh/2)
         pdf.line(bx + bw/2 - 5, by + bh/2, bx + bw/2 - 10, by + bh/2 - 3)
         pdf.line(bx + bw/2 - 5, by + bh/2, bx + bw/2 - 10, by + bh/2 + 3)
-        # Flecha Derecha (apuntando a la izquierda)
+        
         pdf.line(bx + bw/2 + 5, by + bh/2, bx + bw - 5, by + bh/2)
         pdf.line(bx + bw/2 + 5, by + bh/2, bx + bw/2 + 10, by + bh/2 - 3)
         pdf.line(bx + bw/2 + 5, by + bh/2, bx + bw/2 + 10, by + bh/2 + 3)
@@ -86,7 +95,6 @@ def crear_pdf_prado(ventanas_datos, totales_aluminio, cristales_necesarios):
         pdf.text(bx + bw + 2, by + bh - 2, f"{v['chambrana_lat']:.2f}")
         pdf.text(bx + bw - 12, by + bh - 2, f"{v['zoclo']:.2f}")
 
-    # Acomodamos el cursor abajo de los dibujos
     pdf.set_y(y_current + 45)
 
     # Tabla de totales (Aluminio y Cristal)
@@ -96,7 +104,8 @@ def crear_pdf_prado(ventanas_datos, totales_aluminio, cristales_necesarios):
     pdf.cell(90, 8, "Cristal:", border=1)
     pdf.ln()
 
-    pdf.set_font("helvetica", "", 10)
+    # Reducimos un puntito la letra por si son varios tramos de aluminio
+    pdf.set_font("helvetica", "", 9)
     aluminio_keys = list(totales_aluminio.keys())
     max_rows = max(len(aluminio_keys), len(cristales_necesarios))
 
@@ -105,16 +114,18 @@ def crear_pdf_prado(ventanas_datos, totales_aluminio, cristales_necesarios):
         if r < len(aluminio_keys):
             k = aluminio_keys[r]
             val = totales_aluminio[k]
-            pdf.cell(45, 6, f"{k}:", border=1)
-            pdf.cell(45, 6, f"{val:.1f}", border=1, align="R")
+            # Ajustamos anchos: 25 para el nombre, 65 para las cantidades
+            pdf.cell(25, 6, f"{k}:", border=1)
+            pdf.cell(65, 6, f"{val}", border=1, align="R")
         else:
             pdf.cell(90, 6, "", border=1)
 
         # Columna Cristal
         if r < len(cristales_necesarios):
             c = cristales_necesarios[r]
-            pdf.cell(30, 6, f"{c['descripcion']}", border=1)
-            pdf.cell(60, 6, f"{c['largo']:.2f} X {c['ancho']:.2f}", border=1, align="C")
+            # Ajustamos anchos: 20 para la etiqueta, 70 para la medida
+            pdf.cell(20, 6, f"{c['descripcion']}", border=1)
+            pdf.cell(70, 6, f"{c['largo']:.2f} X {c['ancho']:.2f}", border=1, align="C")
         else:
             pdf.cell(90, 6, "", border=1)
         pdf.ln()
@@ -207,8 +218,6 @@ cortes_traslapes = []
 cortes_zoclos = []
 cortes_cabezales = []
 cristales_necesarios = [] 
-
-# Lista para guardar los datos específicos de cada ventana para el PDF
 ventanas_pdf = []
 
 st.write("---")
@@ -263,21 +272,20 @@ if st.button("Calcular Material", type="primary", use_container_width=True):
     zoclos = empacar_piezas(cortes_zoclos, tamanos_basicos)
     cabezales = empacar_piezas(cortes_cabezales, tamanos_basicos)
 
-    # Preparar totales de aluminio para el PDF (sumando centímetros)
+    # Convertimos los cálculos a textos con cantidad de piezas para el PDF
     totales_aluminio = {
-        "Chambrana": sum(c['medida'] for c in cortes_chambranas),
-        "Riel": sum(c['medida'] for c in cortes_rieles),
-        "Adaptador": sum(c['medida'] for c in cortes_adaptadores),
-        "Cerco": sum(c['medida'] for c in cortes_cercos),
-        "Traslape": sum(c['medida'] for c in cortes_traslapes),
-        "Zoclo": sum(c['medida'] for c in cortes_zoclos),
-        "Cabezal": sum(c['medida'] for c in cortes_cabezales),
+        "Chambrana": obtener_texto_compras(chambranas),
+        "Riel": obtener_texto_compras(rieles),
+        "Adaptador": obtener_texto_compras(adaptadores),
+        "Cerco": obtener_texto_compras(cercos),
+        "Traslape": obtener_texto_compras(traslapes),
+        "Zoclo": obtener_texto_compras(zoclos),
+        "Cabezal": obtener_texto_compras(cabezales),
     }
 
     # Generar el archivo PDF
     pdf_bytes = crear_pdf_prado(ventanas_pdf, totales_aluminio, cristales_necesarios)
     
-    # Botón de descarga grandote
     st.download_button(
         label="📄 Descargar Hoja de Presupuesto (PDF)",
         data=pdf_bytes,
