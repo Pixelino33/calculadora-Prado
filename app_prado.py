@@ -79,14 +79,22 @@ def crear_pdf_prado(ventanas_datos, totales_aluminio, cristales_necesarios):
         pdf.line(bx + bw/2 + 5, by + bh/2, bx + bw/2 + 10, by + bh/2 - 3)
         pdf.line(bx + bw/2 + 5, by + bh/2, bx + bw/2 + 10, by + bh/2 + 3)
 
+        # --- CORRECCIÓN DE COORDENADAS PARA EL PDF ---
+        # Medidas Rojas
         pdf.set_text_color(255, 0, 0)
-        pdf.text(bx + bw/2 - 5, by + bh + 5, f"{v['largo']:.2f}")
-        pdf.text(bx + bw + 2, by + 10, f"{v['ancho']:.2f}")
+        # Largo (Abajo centrado)
+        pdf.text(bx + bw/2 - 6, by + bh + 4.5, f"{v['largo']:.2f}")
+        # Ancho (Derecha, arriba del centro)
+        pdf.text(bx + bw + 2, by + bh/2 - 1, f"{v['ancho']:.2f}")
 
+        # Medidas Azules
         pdf.set_text_color(32, 115, 172)
-        pdf.text(x, by + bh - 2, f"{v['cerco']:.2f}")
-        pdf.text(bx + bw + 2, by + bh - 2, f"{v['chambrana_lat']:.2f}")
-        pdf.text(bx + bw - 12, by + bh - 2, f"{v['zoclo']:.2f}")
+        # Cerco (Izquierda, centrado verticalmente)
+        pdf.text(x, by + bh/2 + 2, f"{v['cerco']:.2f}")
+        # Chambrana Lados (Derecha, abajo del centro haciendo pareja con el ancho)
+        pdf.text(bx + bw + 2, by + bh/2 + 3.5, f"{v['chambrana_lat']:.2f}")
+        # Zoclo/Cabezal (Adentro derecha, esquina inferior)
+        pdf.text(bx + bw - 11, by + bh - 2, f"{v['zoclo']:.2f}")
 
     pdf.set_y(y_current + 45)
 
@@ -195,7 +203,6 @@ st.set_page_config(page_title="Calculadora de Materiales", layout="centered", pa
 st.title("Calculadora de Materiales")
 st.write("**Tipo de Ventana:** Corrediza")
 
-# La cantidad de ventanas se queda en 1 por default para que siempre muestre al menos una caja
 num_ventanas = st.number_input("Cantidad de ventanas a armar:", min_value=1, max_value=50, value=1, step=1)
 
 cortes_chambranas = []
@@ -216,11 +223,9 @@ for i in range(1, num_ventanas + 1):
     col_medidas, col_dibujo = st.columns([1, 1])
     
     with col_medidas:
-        # Aquí está la magia: value=None hace que arranquen totalmente vacías
         largo = st.number_input(f"Largo total (cm) - V{i}", min_value=0.0, value=None, step=0.1, format="%.1f", key=f"largo_{i}", placeholder="Ej. 120.0")
         ancho = st.number_input(f"Ancho total (cm) - V{i}", min_value=0.0, value=None, step=0.1, format="%.1f", key=f"ancho_{i}", placeholder="Ej. 100.0")
 
-    # Solo hacemos los cálculos si Prado ya tecleó ambos números
     if largo is not None and ancho is not None and largo > 0 and ancho > 0:
         ancho_lados = ancho - 2.7
         medida_adaptador = largo - 6.5
@@ -270,7 +275,6 @@ if st.button("Calcular Material", type="primary", use_container_width=True):
         "Cabezal": obtener_texto_compras(cabezales),
     }
 
-    # --- AQUÍ ARMAMOS EL NOMBRE CON LA FECHA DE HOY ---
     fecha_hoy = datetime.now().strftime("%d-%m-%Y")
     nombre_archivo_pdf = f"Presupuesto_{fecha_hoy}.pdf"
 
