@@ -111,7 +111,7 @@ cortes_cercos = []
 cortes_traslapes = []
 cortes_zoclos = []
 cortes_cabezales = []
-cristales_necesarios = [] # <--- LISTA NUEVA PARA LOS CRISTALES
+cristales_necesarios = [] 
 
 st.write("---")
 
@@ -185,4 +185,4 @@ if st.button("Calcular Material", type="primary", use_container_width=True):
     if cristales_necesarios:
         st.subheader("🛒 CRISTALES")
         for cristal in cristales_necesarios:
-            st.info(f"**2 piezas** de {cristal['largo']:.1f} cm (Largo) x {cristal['ancho']:.1f} cm (Ancho) ➔ {cristal['descripcion']}")
+            st.info(f"**2 piezas** de {cristal['largo']:.2f} cm (Largo) x {cristal['ancho']:.2f} cm (Ancho) ➔ {cristal['descripcion']}")
