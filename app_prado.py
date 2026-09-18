@@ -28,10 +28,18 @@ def generar_dibujo_ventana(num, largo, ancho, cerco, chambrana_lat, zoclo):
         f'<polyline points="110,75 120,85 110,95" fill="none" stroke="#1b6088" stroke-width="2"/>'
         f'<line x1="180" y1="85" x2="220" y2="85" stroke="#1b6088" stroke-width="2"/>'
         f'<polyline points="190,75 180,85 190,95" fill="none" stroke="#1b6088" stroke-width="2"/>'
+        
+        # Medida en ROJO Abajo (Largo total)
         f'<text x="150" y="160" fill="red" font-family="Arial" font-size="14" text-anchor="middle">{largo:.2f}</text>'
-        f'<text x="260" y="45" fill="red" font-family="Arial" font-size="14">{ancho:.2f}</text>'
-        f'<text x="45" y="130" fill="#2073ac" font-family="Arial" font-size="14" text-anchor="end">{cerco:.2f}</text>'
-        f'<text x="255" y="130" fill="#2073ac" font-family="Arial" font-size="14">{chambrana_lat:.2f}</text>'
+        
+        # Medida en AZUL Izquierda (Cerco) - Centrado verticalmente
+        f'<text x="45" y="90" fill="#2073ac" font-family="Arial" font-size="14" text-anchor="end">{cerco:.2f}</text>'
+        
+        # Medidas Derecha (Ancho total y Chambrana) - Emparejados uno arriba del otro
+        f'<text x="260" y="75" fill="red" font-family="Arial" font-size="14">{ancho:.2f}</text>'
+        f'<text x="260" y="95" fill="#2073ac" font-family="Arial" font-size="14">{chambrana_lat:.2f}</text>'
+        
+        # Medida Interior Abajo Derecha (Zoclo/Cabezal)
         f'<text x="245" y="135" fill="#2073ac" font-family="Arial" font-size="14" text-anchor="end">{zoclo:.2f}</text>'
         f'</svg></div>'
     )
@@ -141,7 +149,7 @@ for i in range(1, num_ventanas + 1):
 
         with col_dibujo:
             dibujo = generar_dibujo_ventana(i, largo, ancho, ancho_cerco, ancho_lados, medida_zc)
-            st.markdown(dibujo, unsafe_allow_html=True)
+            st.html(dibujo)
             
     st.write("---")
 
