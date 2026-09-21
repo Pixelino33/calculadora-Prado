@@ -46,7 +46,6 @@ def crear_pdf_prado(ventanas_datos, totales_aluminio, cristales_necesarios):
     pdf.line(140, pdf.get_y()+6, 195, pdf.get_y()+6)
     pdf.ln(15)
 
-    # Damos un poquito más de margen para que el número izquierdo no se salga de la hoja
     x_start_1 = 25
     x_start_2 = 125
     y_current = pdf.get_y()
@@ -80,28 +79,20 @@ def crear_pdf_prado(ventanas_datos, totales_aluminio, cristales_necesarios):
         pdf.line(bx + bw/2 + 5, by + bh/2, bx + bw/2 + 10, by + bh/2 - 3)
         pdf.line(bx + bw/2 + 5, by + bh/2, bx + bw/2 + 10, by + bh/2 + 3)
 
-        # --- CORRECCIÓN MATEMÁTICA DE COORDENADAS PARA EL PDF ---
         # Medidas Rojas
         pdf.set_text_color(255, 0, 0)
-        # Largo (Centrado perfecto abajo del cuadro)
         str_largo = f"{v['largo']:.2f}"
         w_largo = pdf.get_string_width(str_largo)
         pdf.text(bx + (bw - w_largo)/2, by + bh + 4.5, str_largo)
-        
-        # Ancho (Derecha)
         pdf.text(bx + bw + 2, by + bh/2 - 1, f"{v['ancho']:.2f}")
 
         # Medidas Azules
         pdf.set_text_color(32, 115, 172)
-        # Cerco (Izquierda, se empuja a la izquierda según lo ancho del texto)
         str_cerco = f"{v['cerco']:.2f}"
         w_cerco = pdf.get_string_width(str_cerco)
         pdf.text(bx - w_cerco - 1.5, by + bh/2 + 2, str_cerco)
-        
-        # Chambrana Lados (Derecha)
         pdf.text(bx + bw + 2, by + bh/2 + 3.5, f"{v['chambrana_lat']:.2f}")
         
-        # Zoclo/Cabezal (Adentro derecha, alineado siempre a la orilla del centro)
         str_zoclo = f"{v['zoclo']:.2f}"
         w_zoclo = pdf.get_string_width(str_zoclo)
         pdf.text(bx + bw - w_zoclo - 1.5, by + bh - 2, str_zoclo)
@@ -211,7 +202,12 @@ def mostrar_resultados_ui(lista, nombre_material):
 st.set_page_config(page_title="Calculadora de Materiales", layout="centered", page_icon="🪟")
 
 st.title("Calculadora de Materiales")
-st.write("**Tipo de Ventana:** Corrediza")
+
+# --- NUEVO: Selección de tipo de ventana ---
+tipo_ventana = st.selectbox(
+    "Selecciona el tipo de ventana:",
+    ["2 pulgadas, 2 hojas corredizas"]
+)
 
 num_ventanas = st.number_input("Cantidad de ventanas a armar:", min_value=1, max_value=50, value=1, step=1)
 
@@ -227,42 +223,45 @@ ventanas_pdf = []
 
 st.write("---")
 
-for i in range(1, num_ventanas + 1):
-    st.markdown(f"### Ventana {i}")
-    
-    col_medidas, col_dibujo = st.columns([1, 1])
-    
-    with col_medidas:
-        largo = st.number_input(f"Largo total (cm) - V{i}", min_value=0.0, value=None, step=0.1, format="%.1f", key=f"largo_{i}", placeholder="Ej. 120.0")
-        ancho = st.number_input(f"Ancho total (cm) - V{i}", min_value=0.0, value=None, step=0.1, format="%.1f", key=f"ancho_{i}", placeholder="Ej. 100.0")
+# Todo esto se ejecuta solo si selecciona la de 2 pulgadas (preparando para futuras opciones)
+if tipo_ventana == "2 pulgadas, 2 hojas corredizas":
+    for i in range(1, num_ventanas + 1):
+        st.markdown(f"### Ventana {i}")
+        
+        col_medidas, col_dibujo = st.columns([1, 1])
+        
+        with col_medidas:
+            largo = st.number_input(f"Largo total (cm) - V{i}", min_value=0.0, value=None, step=0.1, format="%.1f", key=f"largo_{i}", placeholder="Ej. 120.0")
+            ancho = st.number_input(f"Ancho total (cm) - V{i}", min_value=0.0, value=None, step=0.1, format="%.1f", key=f"ancho_{i}", placeholder="Ej. 100.0")
 
-    if largo is not None and ancho is not None and largo > 0 and ancho > 0:
-        ancho_lados = ancho - 2.7
-        medida_adaptador = largo - 6.5
-        ancho_cerco = ancho - 4.0
-        medida_zc = (largo - 16.5) / 2.0
-        largo_cristal = medida_zc + 1.5
-        ancho_cristal = ancho_cerco - 9.5
+        if largo is not None and ancho is not None and largo > 0 and ancho > 0:
+            ancho_lados = ancho - 2.7
+            medida_adaptador = largo - 6.5
+            ancho_cerco = ancho - 4.0
+            medida_zc = (largo - 16.5) / 2.0
+            largo_cristal = medida_zc + 1.5
+            ancho_cristal = ancho_cerco - 9.5
 
-        cortes_chambranas.append({'medida': largo, 'descripcion': f"V{i} (Arriba)"})
-        cortes_chambranas.append({'medida': ancho_lados, 'descripcion': f"V{i} (Lado Izq)"})
-        cortes_chambranas.append({'medida': ancho_lados, 'descripcion': f"V{i} (Lado Der)"})
-        cortes_rieles.append({'medida': largo, 'descripcion': f"V{i} (Riel Abajo)"})
-        cortes_adaptadores.append({'medida': medida_adaptador, 'descripcion': f"V{i} (Adaptador Abajo)"})
-        cortes_cercos.extend([{'medida': ancho_cerco, 'descripcion': f"V{i} (Cerco 1)"}, {'medida': ancho_cerco, 'descripcion': f"V{i} (Cerco 2)"}])
-        cortes_traslapes.extend([{'medida': ancho_cerco, 'descripcion': f"V{i} (Traslape 1)"}, {'medida': ancho_cerco, 'descripcion': f"V{i} (Traslape 2)"}])
-        cortes_zoclos.extend([{'medida': medida_zc, 'descripcion': f"V{i} (Zoclo 1)"}, {'medida': medida_zc, 'descripcion': f"V{i} (Zoclo 2)"}])
-        cortes_cabezales.extend([{'medida': medida_zc, 'descripcion': f"V{i} (Cabezal 1)"}, {'medida': medida_zc, 'descripcion': f"V{i} (Cabezal 2)"}])
-        cristales_necesarios.append({'largo': largo_cristal, 'ancho': ancho_cristal, 'descripcion': f"V-{i}"})
+            cortes_chambranas.append({'medida': largo, 'descripcion': f"V{i} (Arriba)"})
+            cortes_chambranas.append({'medida': ancho_lados, 'descripcion': f"V{i} (Lado Izq)"})
+            cortes_chambranas.append({'medida': ancho_lados, 'descripcion': f"V{i} (Lado Der)"})
+            cortes_rieles.append({'medida': largo, 'descripcion': f"V{i} (Riel Abajo)"})
+            cortes_adaptadores.append({'medida': medida_adaptador, 'descripcion': f"V{i} (Adaptador Abajo)"})
+            cortes_cercos.extend([{'medida': ancho_cerco, 'descripcion': f"V{i} (Cerco 1)"}, {'medida': ancho_cerco, 'descripcion': f"V{i} (Cerco 2)"}])
+            cortes_traslapes.extend([{'medida': ancho_cerco, 'descripcion': f"V{i} (Traslape 1)"}, {'medida': ancho_cerco, 'descripcion': f"V{i} (Traslape 2)"}])
+            cortes_zoclos.extend([{'medida': medida_zc, 'descripcion': f"V{i} (Zoclo 1)"}, {'medida': medida_zc, 'descripcion': f"V{i} (Zoclo 2)"}])
+            cortes_cabezales.extend([{'medida': medida_zc, 'descripcion': f"V{i} (Cabezal 1)"}, {'medida': medida_zc, 'descripcion': f"V{i} (Cabezal 2)"}])
+            cristales_necesarios.append({'largo': largo_cristal, 'ancho': ancho_cristal, 'descripcion': f"V-{i}"})
 
-        ventanas_pdf.append({'num': i, 'largo': largo, 'ancho': ancho, 'cerco': ancho_cerco, 'chambrana_lat': ancho_lados, 'zoclo': medida_zc})
+            ventanas_pdf.append({'num': i, 'largo': largo, 'ancho': ancho, 'cerco': ancho_cerco, 'chambrana_lat': ancho_lados, 'zoclo': medida_zc})
 
-        with col_dibujo:
-            dibujo = generar_dibujo_ventana(i, largo, ancho, ancho_cerco, ancho_lados, medida_zc)
-            st.markdown(dibujo, unsafe_allow_html=True)
-            
-    st.write("---")
+            with col_dibujo:
+                dibujo = generar_dibujo_ventana(i, largo, ancho, ancho_cerco, ancho_lados, medida_zc)
+                st.markdown(dibujo, unsafe_allow_html=True)
+                
+        st.write("---")
 
+# El botón de calcular se queda afuera para que funcione sin importar qué ventana se seleccione
 if st.button("Calcular Material", type="primary", use_container_width=True):
     tamanos_basicos = [610.0, 305.0]
     tamanos_especiales = [610.0, 460.0, 230.0]
