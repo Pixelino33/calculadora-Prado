@@ -149,7 +149,7 @@ def crear_pdf_prado(ventanas_datos, totales_aluminio, cristales_necesarios):
             w_zc = pdf.get_string_width(str_zc)
             pdf.text(bx + bw - w_zc - 1.5, by + bh - 1.5, str_zc)
 
-        elif v['tipo'] == "2 pulgadas, 2 hojas corredizas, 2 fijas":
+        elif v['tipo'] in ["2 pulgadas, 2 hojas corredizas, 2 fijas", "3 pulgadas, 2 hojas corredizas, 2 fijas"]:
             w4 = bw / 4
             pdf.line(bx + w4, by, bx + w4, by + bh)
             pdf.line(bx + w4*2, by, bx + w4*2, by + bh)
@@ -289,7 +289,7 @@ def generar_dibujo_ventana(v):
         )
         return svg
         
-    elif tipo == "2 pulgadas, 2 hojas corredizas, 2 fijas":
+    elif tipo in ["2 pulgadas, 2 hojas corredizas, 2 fijas", "3 pulgadas, 2 hojas corredizas, 2 fijas"]:
         cerco_fijo = v['cerco_fijo']
         cerco_corr = v['cerco_corr']
         chambrana_lat = v['chambrana_lat']
@@ -388,7 +388,8 @@ tipo_ventana = st.selectbox(
         "2 pulgadas, 2 hojas corredizas",
         "2 pulgadas, 2 hojas corredizas, 1 fija",
         "2 pulgadas, 2 hojas corredizas, 2 fijas",
-        "3 pulgadas, 2 hojas corredizas"
+        "3 pulgadas, 2 hojas corredizas",
+        "3 pulgadas, 2 hojas corredizas, 2 fijas"
     ]
 )
 
@@ -548,10 +549,7 @@ for i in range(1, num_ventanas + 1):
             ancho_lados = ancho - 2.7
             medida_adaptador = largo - 6.5
             ancho_cerco = ancho - 4.0
-            
-            # --- LA MATEMÁTICA NUEVA DEL ZOCLO A 3 PULGADAS ---
             medida_zc = (largo - 18.0) / 2.0
-            
             largo_cristal = medida_zc + 1.5
             ancho_cristal = ancho_cerco - 9.5
 
@@ -568,6 +566,63 @@ for i in range(1, num_ventanas + 1):
             cristales_necesarios.append({'cant': 2, 'largo': largo_cristal, 'ancho': ancho_cristal, 'descripcion': f"V-{i}"})
             
             v_dict = {'num': i, 'tipo': tipo_ventana, 'largo': largo, 'ancho': ancho, 'cerco': ancho_cerco, 'chambrana_lat': ancho_lados, 'zoclo': medida_zc}
+            ventanas_pdf.append(v_dict)
+
+            with col_dibujo:
+                dibujo = generar_dibujo_ventana(v_dict)
+                st.markdown(dibujo, unsafe_allow_html=True)
+
+        elif tipo_ventana == "3 pulgadas, 2 hojas corredizas, 2 fijas":
+            ancho_lados = ancho - 2.7
+            cerco_fijo = ancho - 3.0
+            cerco_corr = ancho - 4.0 
+            
+            # --- AQUÍ ESTÁ EL AJUSTE PARA 3 PULGADAS DE 4 HOJAS ---
+            zoclo = (largo - 33.0) / 4.0
+            
+            largo_cristal_fijo = zoclo + 1.5
+            ancho_cristal_fijo = cerco_fijo - 9.5
+            largo_cristal_corr = zoclo + 1.5
+            ancho_cristal_corr = cerco_corr - 9.5
+
+            cortes_chambranas.append({'medida': largo, 'descripcion': f"V{i} (Arriba)"})
+            cortes_chambranas.append({'medida': ancho_lados, 'descripcion': f"V{i} (Lado Izq)"})
+            cortes_chambranas.append({'medida': ancho_lados, 'descripcion': f"V{i} (Lado Der)"})
+            cortes_rieles.append({'medida': largo, 'descripcion': f"V{i} (Riel Abajo)"})
+            
+            cortes_cercos.extend([
+                {'medida': cerco_fijo, 'descripcion': f"V{i} (Cerco Fijo 1)"},
+                {'medida': cerco_fijo, 'descripcion': f"V{i} (Cerco Fijo 2)"},
+                {'medida': cerco_corr, 'descripcion': f"V{i} (Cerco Corredizo 1)"},
+                {'medida': cerco_corr, 'descripcion': f"V{i} (Cerco Corredizo 2)"}
+            ])
+            
+            cortes_traslapes.extend([
+                {'medida': cerco_fijo, 'descripcion': f"V{i} (Traslape Fijo 1)"},
+                {'medida': cerco_fijo, 'descripcion': f"V{i} (Traslape Fijo 2)"},
+                {'medida': cerco_corr, 'descripcion': f"V{i} (Traslape Corr 1)"},
+                {'medida': cerco_corr, 'descripcion': f"V{i} (Traslape Corr 2)"}
+            ])
+            
+            cortes_zoclos.extend([
+                {'medida': zoclo, 'descripcion': f"V{i} (Zoclo Fijo 1)"},
+                {'medida': zoclo, 'descripcion': f"V{i} (Zoclo Fijo 2)"},
+                {'medida': zoclo, 'descripcion': f"V{i} (Zoclo Corr 1)"},
+                {'medida': zoclo, 'descripcion': f"V{i} (Zoclo Corr 2)"}
+            ])
+            
+            cortes_cabezales.extend([
+                {'medida': zoclo, 'descripcion': f"V{i} (Cabezal Fijo 1)"},
+                {'medida': zoclo, 'descripcion': f"V{i} (Cabezal Fijo 2)"},
+                {'medida': zoclo, 'descripcion': f"V{i} (Cabezal Corr 1)"},
+                {'medida': zoclo, 'descripcion': f"V{i} (Cabezal Corr 2)"}
+            ])
+            
+            cristales_necesarios.append({'cant': 2, 'largo': largo_cristal_fijo, 'ancho': ancho_cristal_fijo, 'descripcion': f"V-{i} (Fijo)"})
+            cristales_necesarios.append({'cant': 2, 'largo': largo_cristal_corr, 'ancho': ancho_cristal_corr, 'descripcion': f"V-{i} (Corr)"})
+
+            v_dict = {'num': i, 'tipo': tipo_ventana, 'largo': largo, 'ancho': ancho, 
+                      'cerco_fijo': cerco_fijo, 'cerco_corr': cerco_corr, 'chambrana_lat': ancho_lados, 'zoclo': zoclo}
             ventanas_pdf.append(v_dict)
 
             with col_dibujo:
