@@ -63,39 +63,88 @@ def crear_pdf_prado(ventanas_datos, totales_aluminio, cristales_necesarios):
 
         pdf.set_text_color(0, 0, 0)
         pdf.text(x - 5, y_current, f"V-{v['num']}")
-
+        
+        bx, by, bw, bh = x + 10, y_current - 5, 50, 30
         pdf.set_draw_color(27, 96, 136)
         pdf.set_line_width(0.8)
-        bx, by, bw, bh = x + 10, y_current - 5, 50, 30
         pdf.rect(bx, by, bw, bh)
-        pdf.line(bx + bw/2, by, bx + bw/2, by + bh)
 
-        pdf.set_line_width(0.3)
-        pdf.line(bx + 5, by + bh/2, bx + bw/2 - 5, by + bh/2)
-        pdf.line(bx + bw/2 - 5, by + bh/2, bx + bw/2 - 10, by + bh/2 - 3)
-        pdf.line(bx + bw/2 - 5, by + bh/2, bx + bw/2 - 10, by + bh/2 + 3)
-        
-        pdf.line(bx + bw/2 + 5, by + bh/2, bx + bw - 5, by + bh/2)
-        pdf.line(bx + bw/2 + 5, by + bh/2, bx + bw/2 + 10, by + bh/2 - 3)
-        pdf.line(bx + bw/2 + 5, by + bh/2, bx + bw/2 + 10, by + bh/2 + 3)
+        # --- DIBUJO DEPENDIENDO DEL TIPO ---
+        if v['tipo'] == "2 pulgadas, 2 hojas corredizas":
+            pdf.line(bx + bw/2, by, bx + bw/2, by + bh)
 
-        # Medidas Rojas
-        pdf.set_text_color(255, 0, 0)
-        str_largo = f"{v['largo']:.2f}"
-        w_largo = pdf.get_string_width(str_largo)
-        pdf.text(bx + (bw - w_largo)/2, by + bh + 4.5, str_largo)
-        pdf.text(bx + bw + 2, by + bh/2 - 1, f"{v['ancho']:.2f}")
+            pdf.set_line_width(0.3)
+            pdf.line(bx + 5, by + bh/2, bx + bw/2 - 5, by + bh/2)
+            pdf.line(bx + bw/2 - 5, by + bh/2, bx + bw/2 - 10, by + bh/2 - 3)
+            pdf.line(bx + bw/2 - 5, by + bh/2, bx + bw/2 - 10, by + bh/2 + 3)
+            
+            pdf.line(bx + bw/2 + 5, by + bh/2, bx + bw - 5, by + bh/2)
+            pdf.line(bx + bw/2 + 5, by + bh/2, bx + bw/2 + 10, by + bh/2 - 3)
+            pdf.line(bx + bw/2 + 5, by + bh/2, bx + bw/2 + 10, by + bh/2 + 3)
 
-        # Medidas Azules
-        pdf.set_text_color(32, 115, 172)
-        str_cerco = f"{v['cerco']:.2f}"
-        w_cerco = pdf.get_string_width(str_cerco)
-        pdf.text(bx - w_cerco - 1.5, by + bh/2 + 2, str_cerco)
-        pdf.text(bx + bw + 2, by + bh/2 + 3.5, f"{v['chambrana_lat']:.2f}")
-        
-        str_zoclo = f"{v['zoclo']:.2f}"
-        w_zoclo = pdf.get_string_width(str_zoclo)
-        pdf.text(bx + bw - w_zoclo - 1.5, by + bh - 2, str_zoclo)
+            pdf.set_text_color(255, 0, 0)
+            str_largo = f"{v['largo']:.2f}"
+            w_largo = pdf.get_string_width(str_largo)
+            pdf.text(bx + (bw - w_largo)/2, by + bh + 4.5, str_largo)
+            pdf.text(bx + bw + 2, by + bh/2 - 1, f"{v['ancho']:.2f}")
+
+            pdf.set_text_color(32, 115, 172)
+            str_cerco = f"{v['cerco']:.2f}"
+            w_cerco = pdf.get_string_width(str_cerco)
+            pdf.text(bx - w_cerco - 1.5, by + bh/2 + 2, str_cerco)
+            pdf.text(bx + bw + 2, by + bh/2 + 3.5, f"{v['chambrana_lat']:.2f}")
+            
+            str_zoclo = f"{v['zoclo']:.2f}"
+            w_zoclo = pdf.get_string_width(str_zoclo)
+            pdf.text(bx + bw - w_zoclo - 1.5, by + bh - 2, str_zoclo)
+
+        elif v['tipo'] == "2 pulgadas, 2 hojas corredizas, 1 fija":
+            w3 = bw / 3
+            pdf.line(bx + w3, by, bx + w3, by + bh)
+            pdf.line(bx + w3*2, by, bx + w3*2, by + bh)
+
+            pdf.set_font("helvetica", "B", 11)
+            pdf.text(bx + w3/2 - 3, by + bh/2 + 3, "F")
+            pdf.set_font("helvetica", "", 10)
+
+            # Flecha centro (->)
+            pdf.set_line_width(0.3)
+            cx = bx + w3 + w3/2
+            pdf.line(cx - 5, by + bh/2, cx + 5, by + bh/2)
+            pdf.line(cx + 5, by + bh/2, cx + 2, by + bh/2 - 2)
+            pdf.line(cx + 5, by + bh/2, cx + 2, by + bh/2 + 2)
+            
+            # Flecha der (<-)
+            rx = bx + w3*2 + w3/2
+            pdf.line(rx + 5, by + bh/2, rx - 5, by + bh/2)
+            pdf.line(rx - 5, by + bh/2, rx - 2, by + bh/2 - 2)
+            pdf.line(rx - 5, by + bh/2, rx - 2, by + bh/2 + 2)
+
+            pdf.set_text_color(255, 0, 0)
+            str_largo = f"{v['largo']:.2f}"
+            w_largo = pdf.get_string_width(str_largo)
+            pdf.text(bx + (bw - w_largo)/2, by + bh + 4.5, str_largo)
+            pdf.text(bx + bw + 2, by + bh/2 - 1, f"{v['ancho']:.2f}")
+
+            pdf.set_text_color(32, 115, 172)
+            str_cf = f"CF: {v['cerco_fijo']:.2f}"
+            w_cf = pdf.get_string_width(str_cf)
+            pdf.text(bx - w_cf - 1.5, by + bh/2 + 2, str_cf)
+
+            str_cc = f"CC: {v['cerco_corr']:.2f}"
+            w_cc = pdf.get_string_width(str_cc)
+            # Centrado arriba del panel de en medio
+            pdf.text(bx + w3 + (w3 - w_cc)/2, by - 1, str_cc)
+
+            pdf.text(bx + bw + 2, by + bh/2 + 3.5, f"{v['chambrana_lat']:.2f}")
+
+            str_zf = f"{v['zoclo_fijo']:.2f}"
+            w_zf = pdf.get_string_width(str_zf)
+            pdf.text(bx + w3 - w_zf - 1.5, by + bh - 1.5, str_zf)
+            
+            str_zc = f"{v['zoclo_corr']:.2f}"
+            w_zc = pdf.get_string_width(str_zc)
+            pdf.text(bx + bw - w_zc - 1.5, by + bh - 1.5, str_zc)
 
     pdf.set_y(y_current + 45)
 
@@ -120,8 +169,9 @@ def crear_pdf_prado(ventanas_datos, totales_aluminio, cristales_necesarios):
 
         if r < len(cristales_necesarios):
             c = cristales_necesarios[r]
-            pdf.cell(20, 6, f"{c['descripcion']}", border=1)
-            pdf.cell(70, 6, f"{c['largo']:.2f} X {c['ancho']:.2f}", border=1, align="C")
+            pdf.cell(25, 6, f"{c['descripcion']}", border=1)
+            # Imprime con la cantidad dinámica (1 pz o 2 pz)
+            pdf.cell(65, 6, f"{c['cant']} pz de {c['largo']:.2f} X {c['ancho']:.2f}", border=1, align="C")
         else:
             pdf.cell(90, 6, "", border=1)
         pdf.ln()
@@ -129,25 +179,64 @@ def crear_pdf_prado(ventanas_datos, totales_aluminio, cristales_necesarios):
     return bytes(pdf.output())
 
 # --- FUNCIÓN PARA EL DIBUJO EN PANTALLA ---
-def generar_dibujo_ventana(num, largo, ancho, cerco, chambrana_lat, zoclo):
-    svg = (
-        f'<div style="display: flex; justify-content: center; margin-bottom: 10px;">'
-        f'<svg viewBox="0 0 350 180" width="100%" max-width="350px" xmlns="http://www.w3.org/2000/svg">'
-        f'<text x="10" y="20" font-family="Arial" font-size="14" fill="black">V-{num}</text>'
-        f'<rect x="50" y="30" width="200" height="110" fill="none" stroke="#1b6088" stroke-width="3"/>'
-        f'<line x1="150" y1="30" x2="150" y2="140" stroke="#1b6088" stroke-width="2"/>'
-        f'<line x1="80" y1="85" x2="120" y2="85" stroke="#1b6088" stroke-width="2"/>'
-        f'<polyline points="110,75 120,85 110,95" fill="none" stroke="#1b6088" stroke-width="2"/>'
-        f'<line x1="180" y1="85" x2="220" y2="85" stroke="#1b6088" stroke-width="2"/>'
-        f'<polyline points="190,75 180,85 190,95" fill="none" stroke="#1b6088" stroke-width="2"/>'
-        f'<text x="150" y="160" fill="red" font-family="Arial" font-size="14" text-anchor="middle">{largo:.2f}</text>'
-        f'<text x="45" y="90" fill="#2073ac" font-family="Arial" font-size="14" text-anchor="end">{cerco:.2f}</text>'
-        f'<text x="260" y="75" fill="red" font-family="Arial" font-size="14">{ancho:.2f}</text>'
-        f'<text x="260" y="95" fill="#2073ac" font-family="Arial" font-size="14">{chambrana_lat:.2f}</text>'
-        f'<text x="245" y="135" fill="#2073ac" font-family="Arial" font-size="14" text-anchor="end">{zoclo:.2f}</text>'
-        f'</svg></div>'
-    )
-    return svg
+def generar_dibujo_ventana(v):
+    num = v['num']
+    tipo = v['tipo']
+    largo = v['largo']
+    ancho = v['ancho']
+    
+    if tipo == "2 pulgadas, 2 hojas corredizas":
+        cerco = v['cerco']
+        chambrana_lat = v['chambrana_lat']
+        zoclo = v['zoclo']
+        svg = (
+            f'<div style="display: flex; justify-content: center; margin-bottom: 10px;">'
+            f'<svg viewBox="0 0 350 180" width="100%" max-width="350px" xmlns="http://www.w3.org/2000/svg">'
+            f'<text x="10" y="20" font-family="Arial" font-size="14" fill="black">V-{num}</text>'
+            f'<rect x="50" y="30" width="200" height="110" fill="none" stroke="#1b6088" stroke-width="3"/>'
+            f'<line x1="150" y1="30" x2="150" y2="140" stroke="#1b6088" stroke-width="2"/>'
+            f'<line x1="80" y1="85" x2="120" y2="85" stroke="#1b6088" stroke-width="2"/>'
+            f'<polyline points="110,75 120,85 110,95" fill="none" stroke="#1b6088" stroke-width="2"/>'
+            f'<line x1="180" y1="85" x2="220" y2="85" stroke="#1b6088" stroke-width="2"/>'
+            f'<polyline points="190,75 180,85 190,95" fill="none" stroke="#1b6088" stroke-width="2"/>'
+            f'<text x="150" y="160" fill="red" font-family="Arial" font-size="14" text-anchor="middle">{largo:.2f}</text>'
+            f'<text x="45" y="90" fill="#2073ac" font-family="Arial" font-size="14" text-anchor="end">{cerco:.2f}</text>'
+            f'<text x="260" y="75" fill="red" font-family="Arial" font-size="14">{ancho:.2f}</text>'
+            f'<text x="260" y="95" fill="#2073ac" font-family="Arial" font-size="14">{chambrana_lat:.2f}</text>'
+            f'<text x="245" y="135" fill="#2073ac" font-family="Arial" font-size="14" text-anchor="end">{zoclo:.2f}</text>'
+            f'</svg></div>'
+        )
+        return svg
+        
+    elif tipo == "2 pulgadas, 2 hojas corredizas, 1 fija":
+        cerco_fijo = v['cerco_fijo']
+        cerco_corr = v['cerco_corr']
+        chambrana_lat = v['chambrana_lat']
+        zoclo_fijo = v['zoclo_fijo']
+        zoclo_corr = v['zoclo_corr']
+        svg = (
+            f'<div style="display: flex; justify-content: center; margin-bottom: 10px;">'
+            f'<svg viewBox="0 0 350 180" width="100%" max-width="350px" xmlns="http://www.w3.org/2000/svg">'
+            f'<text x="10" y="20" font-family="Arial" font-size="14" fill="black">V-{num}</text>'
+            f'<rect x="50" y="30" width="200" height="110" fill="none" stroke="#1b6088" stroke-width="3"/>'
+            f'<line x1="116.6" y1="30" x2="116.6" y2="140" stroke="#1b6088" stroke-width="2"/>'
+            f'<line x1="183.3" y1="30" x2="183.3" y2="140" stroke="#1b6088" stroke-width="2"/>'
+            f'<text x="83.3" y="92" font-family="Arial" font-size="18" font-weight="bold" fill="black" text-anchor="middle">F</text>'
+            f'<line x1="130" y1="85" x2="170" y2="85" stroke="#1b6088" stroke-width="2"/>'
+            f'<polyline points="160,75 170,85 160,95" fill="none" stroke="#1b6088" stroke-width="2"/>'
+            f'<line x1="235" y1="85" x2="195" y2="85" stroke="#1b6088" stroke-width="2"/>'
+            f'<polyline points="205,75 195,85 205,95" fill="none" stroke="#1b6088" stroke-width="2"/>'
+            f'<text x="150" y="160" fill="red" font-family="Arial" font-size="14" text-anchor="middle">{largo:.2f}</text>'
+            f'<text x="260" y="75" fill="red" font-family="Arial" font-size="14">{ancho:.2f}</text>'
+            f'<text x="45" y="90" fill="#2073ac" font-family="Arial" font-size="14" text-anchor="end">CF: {cerco_fijo:.2f}</text>'
+            f'<text x="150" y="25" fill="#2073ac" font-family="Arial" font-size="13" text-anchor="middle">CC: {cerco_corr:.2f}</text>'
+            f'<text x="260" y="95" fill="#2073ac" font-family="Arial" font-size="14">{chambrana_lat:.2f}</text>'
+            f'<text x="112" y="135" fill="#2073ac" font-family="Arial" font-size="13" text-anchor="end">{zoclo_fijo:.2f}</text>'
+            f'<text x="245" y="135" fill="#2073ac" font-family="Arial" font-size="13" text-anchor="end">{zoclo_corr:.2f}</text>'
+            f'</svg></div>'
+        )
+        return svg
+
 # ---------------------------------------------------------
 
 def empacar_piezas(cortes, tamanos_disponibles):
@@ -203,10 +292,12 @@ st.set_page_config(page_title="Calculadora de Materiales", layout="centered", pa
 
 st.title("Calculadora de Materiales")
 
-# --- NUEVO: Selección de tipo de ventana ---
 tipo_ventana = st.selectbox(
     "Selecciona el tipo de ventana:",
-    ["2 pulgadas, 2 hojas corredizas"]
+    [
+        "2 pulgadas, 2 hojas corredizas",
+        "2 pulgadas, 2 hojas corredizas, 1 fija"
+    ]
 )
 
 num_ventanas = st.number_input("Cantidad de ventanas a armar:", min_value=1, max_value=50, value=1, step=1)
@@ -223,18 +314,17 @@ ventanas_pdf = []
 
 st.write("---")
 
-# Todo esto se ejecuta solo si selecciona la de 2 pulgadas (preparando para futuras opciones)
-if tipo_ventana == "2 pulgadas, 2 hojas corredizas":
-    for i in range(1, num_ventanas + 1):
-        st.markdown(f"### Ventana {i}")
-        
-        col_medidas, col_dibujo = st.columns([1, 1])
-        
-        with col_medidas:
-            largo = st.number_input(f"Largo total (cm) - V{i}", min_value=0.0, value=None, step=0.1, format="%.1f", key=f"largo_{i}", placeholder="Ej. 120.0")
-            ancho = st.number_input(f"Ancho total (cm) - V{i}", min_value=0.0, value=None, step=0.1, format="%.1f", key=f"ancho_{i}", placeholder="Ej. 100.0")
+for i in range(1, num_ventanas + 1):
+    st.markdown(f"### Ventana {i}")
+    
+    col_medidas, col_dibujo = st.columns([1, 1])
+    
+    with col_medidas:
+        largo = st.number_input(f"Largo total (cm) - V{i}", min_value=0.0, value=None, step=0.1, format="%.1f", key=f"largo_{i}", placeholder="Ej. 120.0")
+        ancho = st.number_input(f"Ancho total (cm) - V{i}", min_value=0.0, value=None, step=0.1, format="%.1f", key=f"ancho_{i}", placeholder="Ej. 100.0")
 
-        if largo is not None and ancho is not None and largo > 0 and ancho > 0:
+    if largo is not None and ancho is not None and largo > 0 and ancho > 0:
+        if tipo_ventana == "2 pulgadas, 2 hojas corredizas":
             ancho_lados = ancho - 2.7
             medida_adaptador = largo - 6.5
             ancho_cerco = ancho - 4.0
@@ -251,17 +341,64 @@ if tipo_ventana == "2 pulgadas, 2 hojas corredizas":
             cortes_traslapes.extend([{'medida': ancho_cerco, 'descripcion': f"V{i} (Traslape 1)"}, {'medida': ancho_cerco, 'descripcion': f"V{i} (Traslape 2)"}])
             cortes_zoclos.extend([{'medida': medida_zc, 'descripcion': f"V{i} (Zoclo 1)"}, {'medida': medida_zc, 'descripcion': f"V{i} (Zoclo 2)"}])
             cortes_cabezales.extend([{'medida': medida_zc, 'descripcion': f"V{i} (Cabezal 1)"}, {'medida': medida_zc, 'descripcion': f"V{i} (Cabezal 2)"}])
-            cristales_necesarios.append({'largo': largo_cristal, 'ancho': ancho_cristal, 'descripcion': f"V-{i}"})
-
-            ventanas_pdf.append({'num': i, 'largo': largo, 'ancho': ancho, 'cerco': ancho_cerco, 'chambrana_lat': ancho_lados, 'zoclo': medida_zc})
+            
+            cristales_necesarios.append({'cant': 2, 'largo': largo_cristal, 'ancho': ancho_cristal, 'descripcion': f"V-{i}"})
+            
+            v_dict = {'num': i, 'tipo': tipo_ventana, 'largo': largo, 'ancho': ancho, 'cerco': ancho_cerco, 'chambrana_lat': ancho_lados, 'zoclo': medida_zc}
+            ventanas_pdf.append(v_dict)
 
             with col_dibujo:
-                dibujo = generar_dibujo_ventana(i, largo, ancho, ancho_cerco, ancho_lados, medida_zc)
+                dibujo = generar_dibujo_ventana(v_dict)
                 st.markdown(dibujo, unsafe_allow_html=True)
-                
-        st.write("---")
 
-# El botón de calcular se queda afuera para que funcione sin importar qué ventana se seleccione
+        elif tipo_ventana == "2 pulgadas, 2 hojas corredizas, 1 fija":
+            ancho_lados = ancho - 2.7
+            medida_adaptador = (largo / 3.0) * 2.0
+            cerco_fijo = ancho - 3.0
+            cerco_corr = ancho - 3.0
+            zoclo_fijo = ((largo - 19.0) / 3.0) + 2.0
+            zoclo_corr = ((largo - 19.0) / 3.0) - 1.0
+            
+            largo_cristal_fijo = zoclo_fijo + 1.5
+            ancho_cristal_fijo = cerco_fijo - 9.5
+            largo_cristal_corr = zoclo_corr + 1.5
+            ancho_cristal_corr = cerco_corr - 9.5
+
+            cortes_chambranas.append({'medida': largo, 'descripcion': f"V{i} (Arriba)"})
+            cortes_chambranas.append({'medida': ancho_lados, 'descripcion': f"V{i} (Lado Izq)"})
+            cortes_chambranas.append({'medida': ancho_lados, 'descripcion': f"V{i} (Lado Der)"})
+            cortes_rieles.append({'medida': largo, 'descripcion': f"V{i} (Riel Abajo)"})
+            cortes_adaptadores.append({'medida': medida_adaptador, 'descripcion': f"V{i} (Adaptador Abajo)"})
+            
+            cortes_cercos.extend([{'medida': cerco_fijo, 'descripcion': f"V{i} (Cerco Fijo)"}, {'medida': cerco_corr, 'descripcion': f"V{i} (Cerco Corredizo)"}])
+            
+            cortes_traslapes.extend([{'medida': cerco_fijo, 'descripcion': f"V{i} (Traslape Fijo)"},
+                                     {'medida': cerco_corr, 'descripcion': f"V{i} (Traslape Corr 1)"},
+                                     {'medida': cerco_corr, 'descripcion': f"V{i} (Traslape Corr 2)"},
+                                     {'medida': cerco_corr, 'descripcion': f"V{i} (Traslape Corr 3)"}])
+            
+            cortes_zoclos.extend([{'medida': zoclo_fijo, 'descripcion': f"V{i} (Zoclo Fijo)"},
+                                  {'medida': zoclo_corr, 'descripcion': f"V{i} (Zoclo Corr 1)"},
+                                  {'medida': zoclo_corr, 'descripcion': f"V{i} (Zoclo Corr 2)"}])
+            
+            cortes_cabezales.extend([{'medida': zoclo_fijo, 'descripcion': f"V{i} (Cabezal Fijo)"},
+                                     {'medida': zoclo_corr, 'descripcion': f"V{i} (Cabezal Corr 1)"},
+                                     {'medida': zoclo_corr, 'descripcion': f"V{i} (Cabezal Corr 2)"}])
+            
+            cristales_necesarios.append({'cant': 1, 'largo': largo_cristal_fijo, 'ancho': ancho_cristal_fijo, 'descripcion': f"V-{i} (Fijo)"})
+            cristales_necesarios.append({'cant': 2, 'largo': largo_cristal_corr, 'ancho': ancho_cristal_corr, 'descripcion': f"V-{i} (Corr)"})
+
+            v_dict = {'num': i, 'tipo': tipo_ventana, 'largo': largo, 'ancho': ancho, 
+                      'cerco_fijo': cerco_fijo, 'cerco_corr': cerco_corr, 'chambrana_lat': ancho_lados, 
+                      'zoclo_fijo': zoclo_fijo, 'zoclo_corr': zoclo_corr}
+            ventanas_pdf.append(v_dict)
+
+            with col_dibujo:
+                dibujo = generar_dibujo_ventana(v_dict)
+                st.markdown(dibujo, unsafe_allow_html=True)
+            
+    st.write("---")
+
 if st.button("Calcular Material", type="primary", use_container_width=True):
     tamanos_basicos = [610.0, 305.0]
     tamanos_especiales = [610.0, 460.0, 230.0]
@@ -308,4 +445,4 @@ if st.button("Calcular Material", type="primary", use_container_width=True):
     if cristales_necesarios:
         st.subheader("🛒 CRISTALES")
         for cristal in cristales_necesarios:
-            st.info(f"**2 piezas** de {cristal['largo']:.2f} cm (Largo) x {cristal['ancho']:.2f} cm (Ancho) ➔ {cristal['descripcion']}")
+            st.info(f"**{cristal['cant']} pieza(s)** de {cristal['largo']:.2f} cm (Largo) x {cristal['ancho']:.2f} cm (Ancho) ➔ {cristal['descripcion']}")
