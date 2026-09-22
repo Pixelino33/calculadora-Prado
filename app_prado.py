@@ -127,13 +127,19 @@ def crear_pdf_prado(ventanas_datos, totales_aluminio, cristales_necesarios):
             pdf.text(bx + bw + 2, by + bh/2 - 1, f"{v['ancho']:.2f}")
 
             pdf.set_text_color(32, 115, 172)
-            str_cf = f"CF: {v['cerco_fijo']:.2f}"
-            w_cf = pdf.get_string_width(str_cf)
-            pdf.text(bx - w_cf - 1.5, by + bh/2 + 2, str_cf)
+            
+            # CF dividido en dos renglones (PDF)
+            str_cf_lbl = "CF"
+            w_cf_lbl = pdf.get_string_width(str_cf_lbl)
+            pdf.text(bx - w_cf_lbl - 1.5, by + bh/2 - 1.5, str_cf_lbl)
+            
+            str_cf_num = f"{v['cerco_fijo']:.2f}"
+            w_cf_num = pdf.get_string_width(str_cf_num)
+            pdf.text(bx - w_cf_num - 1.5, by + bh/2 + 3.5, str_cf_num)
 
+            # CC arriba del panel medio
             str_cc = f"CC: {v['cerco_corr']:.2f}"
             w_cc = pdf.get_string_width(str_cc)
-            # Centrado arriba del panel de en medio
             pdf.text(bx + w3 + (w3 - w_cc)/2, by - 1, str_cc)
 
             pdf.text(bx + bw + 2, by + bh/2 + 3.5, f"{v['chambrana_lat']:.2f}")
@@ -170,7 +176,6 @@ def crear_pdf_prado(ventanas_datos, totales_aluminio, cristales_necesarios):
         if r < len(cristales_necesarios):
             c = cristales_necesarios[r]
             pdf.cell(25, 6, f"{c['descripcion']}", border=1)
-            # Imprime con la cantidad dinámica (1 pz o 2 pz)
             pdf.cell(65, 6, f"{c['cant']} pz de {c['largo']:.2f} X {c['ancho']:.2f}", border=1, align="C")
         else:
             pdf.cell(90, 6, "", border=1)
@@ -228,7 +233,11 @@ def generar_dibujo_ventana(v):
             f'<polyline points="205,75 195,85 205,95" fill="none" stroke="#1b6088" stroke-width="2"/>'
             f'<text x="150" y="160" fill="red" font-family="Arial" font-size="14" text-anchor="middle">{largo:.2f}</text>'
             f'<text x="260" y="75" fill="red" font-family="Arial" font-size="14">{ancho:.2f}</text>'
-            f'<text x="45" y="90" fill="#2073ac" font-family="Arial" font-size="14" text-anchor="end">CF: {cerco_fijo:.2f}</text>'
+            
+            # CF dividido en dos renglones (SVG en pantalla)
+            f'<text x="45" y="78" fill="#2073ac" font-family="Arial" font-size="14" text-anchor="end">CF</text>'
+            f'<text x="45" y="96" fill="#2073ac" font-family="Arial" font-size="14" text-anchor="end">{cerco_fijo:.2f}</text>'
+            
             f'<text x="150" y="25" fill="#2073ac" font-family="Arial" font-size="13" text-anchor="middle">CC: {cerco_corr:.2f}</text>'
             f'<text x="260" y="95" fill="#2073ac" font-family="Arial" font-size="14">{chambrana_lat:.2f}</text>'
             f'<text x="112" y="135" fill="#2073ac" font-family="Arial" font-size="13" text-anchor="end">{zoclo_fijo:.2f}</text>'
@@ -355,7 +364,10 @@ for i in range(1, num_ventanas + 1):
             ancho_lados = ancho - 2.7
             medida_adaptador = (largo / 3.0) * 2.0
             cerco_fijo = ancho - 3.0
-            cerco_corr = ancho - 3.0
+            
+            # --- CORRECCIÓN MATEMÁTICA CC = ancho - 4.0 ---
+            cerco_corr = ancho - 4.0 
+            
             zoclo_fijo = ((largo - 19.0) / 3.0) + 2.0
             zoclo_corr = ((largo - 19.0) / 3.0) - 1.0
             
