@@ -45,7 +45,6 @@ def crear_pdf_prado(ventanas_datos, totales_aluminio, cristales_necesarios):
     pdf.cell(18, 8, "Dirección:")
     pdf.line(140, pdf.get_y()+6, 195, pdf.get_y()+6)
     
-    # AQUÍ ESTÁ EL CAMBIO: Le dimos un bajón más grande para despegar el dibujo de las líneas
     pdf.ln(25)
 
     x_start_1 = 25
@@ -136,7 +135,8 @@ def crear_pdf_prado(ventanas_datos, totales_aluminio, cristales_necesarios):
             w_cf_num = pdf.get_string_width(str_cf_num)
             pdf.text(bx - w_cf_num - 1.5, by + bh/2 + 3.5, str_cf_num)
 
-            str_cc = f"CC: {v['cerco_corr']:.2f}"
+            # AQUÍ SE QUITARON LOS DOS PUNTOS PARA EL PDF
+            str_cc = f"CC {v['cerco_corr']:.2f}"
             w_cc = pdf.get_string_width(str_cc)
             pdf.text(bx + w3 + (w3 - w_cc)/2, by - 1, str_cc)
 
@@ -233,7 +233,10 @@ def generar_dibujo_ventana(v):
             f'<text x="260" y="75" fill="red" font-family="Arial" font-size="14">{ancho:.2f}</text>'
             f'<text x="45" y="78" fill="#2073ac" font-family="Arial" font-size="14" text-anchor="end">CF</text>'
             f'<text x="45" y="96" fill="#2073ac" font-family="Arial" font-size="14" text-anchor="end">{cerco_fijo:.2f}</text>'
-            f'<text x="150" y="25" fill="#2073ac" font-family="Arial" font-size="13" text-anchor="middle">CC: {cerco_corr:.2f}</text>'
+            
+            # AQUÍ SE QUITARON LOS DOS PUNTOS PARA LA WEB
+            f'<text x="150" y="25" fill="#2073ac" font-family="Arial" font-size="13" text-anchor="middle">CC {cerco_corr:.2f}</text>'
+            
             f'<text x="260" y="95" fill="#2073ac" font-family="Arial" font-size="14">{chambrana_lat:.2f}</text>'
             f'<text x="112" y="135" fill="#2073ac" font-family="Arial" font-size="13" text-anchor="end">{zoclo_fijo:.2f}</text>'
             f'<text x="245" y="135" fill="#2073ac" font-family="Arial" font-size="13" text-anchor="end">{zoclo_corr:.2f}</text>'
