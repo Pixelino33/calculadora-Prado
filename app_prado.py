@@ -449,8 +449,10 @@ for i in range(1, num_ventanas + 1):
             medida_adaptador = (largo / 3.0) * 2.0
             cerco_fijo = ancho - 3.0
             cerco_corr = ancho - 4.0 
+            
+            # --- AQUÍ ESTÁ LA REVERSA DE LA FÓRMULA ---
+            zoclo_fijo = ((largo - 19.0) / 3.0) + 2.0
             zoclo_corr = ((largo - 19.0) / 3.0) - 1.0
-            zoclo_fijo = zoclo_corr + 2.0
             
             largo_cristal_fijo = zoclo_fijo + 1.5
             ancho_cristal_fijo = cerco_fijo - 9.5
@@ -576,8 +578,6 @@ for i in range(1, num_ventanas + 1):
             ancho_lados = ancho - 2.7
             cerco_fijo = ancho - 3.0
             cerco_corr = ancho - 4.0 
-            
-            # --- AQUÍ ESTÁ EL AJUSTE PARA 3 PULGADAS DE 4 HOJAS ---
             zoclo = (largo - 33.0) / 4.0
             
             largo_cristal_fijo = zoclo + 1.5
